@@ -1,111 +1,73 @@
-function save_drop_down_list_option(elementId, storageName) {
-		var element = document.getElementById(elementId);
-		var value = element.children[element.selectedIndex].value;
-		localStorage[storageName] = value;
+var optionGroups = [
+	{
+		name: "General",
+		options: [
+			{name: "userName", text: "User name", default: "", help: "You need to set your user name in order to use the bookmark view shortcuts."},
+		]
+	},
+	{
+		name: "Menu Items",
+		options: [
+			{name: "showSaveBookmark", text: "Save Bookmark", default: true, type: "bool", pinboardAction: "saveBookmark"},
+			{name: "showReadLater", text: "Read Later", default: false, type: "bool", pinboardAction: "readLater"},
+			{name: "showAllBookmarks", text: "All Bookmarks", default: false, type: "bool", pinboardUrl: ""},
+			{name: "showPrivateBookmarks", text: "Private Bookmarks", default: false, type: "bool", pinboardUrl: "private/"},
+			{name: "showPublicBookmarks", text: "Public Bookmarks", default: false, type: "bool", pinboardUrl: "public/"},
+			{name: "showUnreadBookmarks", text: "Unread Bookmarks", default: false, type: "bool", pinboardUrl: "unread/"},
+			{name: "showUntaggedBookmarks", text: "Untagged Bookmarks", default: false, type: "bool", pinboardUrl: "untagged/"},
+			{name: "showStarredBookmarks", text: "Starred Bookmarks", default: false, type: "bool", pinboardUrl: "starred/"},
+		]
+	},
+	{
+		name: "Behavior",
+		options: [
+			{name: "openPopup", text: "Open Popup Windows", default: false, type: "bool", help: "Open popup windows instead of inlining the Pinboard dialog into the popup bubble."},
+			{name: "useHTTPS", text: "Use HTTPS", default: true, type: "bool", help: "Use secure HTTPS URLs for Pinboard."}
+		]
 	}
+];
 
-function load_drop_down_list_option(elementId, storageName) {
-	var value = localStorage[storageName];
-	if (!value) {
-		return;
+var options = {};
+optionGroups.forEach(function(group) {
+	optionGroups[group.name] = group;
+	group.options.forEach(function(option) {
+		options[option.name] = option;
+	});
+});
+
+function getOptionValue(name) {
+	var opt = options[name];
+	if(!opt) {
+		console.log("Trying to get nonexistent option " + name);
+		return null;
 	}
-
-	var element = document.getElementById(elementId);
-
-	for (var i=0; i<element.children.length; i++) {
-		var child = element.children[i];
-		if (child.value == value) {
-			child.selected = "true";
-			break;
+	var val = localStorage.getItem(name);
+	if(val !== undefined) {
+		if(opt.type === "bool") {
+			return ((val == "true" || val == "yes" || val == "on" || !!parseInt(opt, 10)) ? true : false);
 		}
+		return val;
+	}
+	return opt.default;
+}
+
+function setOptionValue(name, value) {
+	var opt = options[name];
+	if(opt) {
+		if(opt.type == "bool") {
+			value = (value ? "true" : "false");
+		}
+		if (value !== null) {
+			localStorage.setItem(name, value);
+		}
+		else {
+			localStorage.removeItem(name);
+		}
+	} else {
+		console.log("Trying to set nonexistent option " + name);
 	}
 }
 
-function getOptionValue(name, defaultValue) {	
-	var value = localStorage[name];	
-	if (!value) {
-		return defaultValue;
-	}		
-	return value;
-}
-
-function setOptionValue(name, value) {	
-	if (value) {
-		localStorage[name] = value;
-	}
-	else {
-		localStorage.removeItem(name);
-	}
-}
-
-function getOptionUserName() {
-	return getOptionValue('userName', '');
-}
-
-function setOptionUserName(value) {
-	return setOptionValue('userName', value);
-}
-
-function getOptionShowAllBookmarks() {
-	return getOptionValue('showAllBookmarks', 'yes');
-}
-
-function setOptionShowAllBookmarks(value) {
-	return setOptionValue('showAllBookmarks', value);
-}
-
-function getOptionShowPrivateBookmarks() {
-	return getOptionValue('showPrivateBookmarks', 'no');
-}
-
-function setOptionShowPrivateBookmarks(value) {
-	return setOptionValue('showPrivateBookmarks', value);
-}
-
-function getOptionShowPublicBookmarks() {
-	return getOptionValue('showPublicBookmarks', 'no');
-}
-
-function setOptionShowPublicBookmarks(value) {
-	return setOptionValue('showPublicBookmarks', value);
-}
-
-function getOptionShowUnreadBookmarks() {
-	return getOptionValue('showUnreadBookmarks', 'no');
-}
-
-function setOptionShowUnreadBookmarks(value) {
-	return setOptionValue('showUnreadBookmarks', value);
-}
-
-function getOptionShowUntaggedBookmarks() {
-	return getOptionValue('showUntaggedBookmarks', 'no');
-}
-
-function setOptionShowUntaggedBookmarks(value) {
-	return setOptionValue('showUntaggedBookmarks', value);
-}
-
-function getOptionShowStarredBookmarks() {
-	return getOptionValue('showStarredBookmarks', 'no');
-}
-
-function setOptionShowStarredBookmarks(value) {
-	return setOptionValue('showStarredBookmarks', value);
-}
-
-function getOptionShowSaveBookmark() {
-	return getOptionValue('showSaveBookmark', 'yes');
-}
-
-function setOptionShowSaveBookmark(value) {
-	return setOptionValue('showSaveBookmark', value);
-}
-
-function getOptionShowReadLater() {
-	return getOptionValue('showReadLater', 'yes');
-}
-
-function setOptionShowReadLater(value) {
-	return setOptionValue('showReadLater', value);
+function resetAllOptions() {
+	for(var optName in options) setOptionValue(optName, options[optName].default);
 }

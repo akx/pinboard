@@ -1,12 +1,10 @@
-
-div#body-content {	
-	padding-left: 2px;	
-	padding-right: 2px;	
+body, input {
 	font-family: Helvetica, Arial, sans-serif;
-	font-size: 87%;
+	font-size: 10pt;
 }
 
-div.options-title h1{
+
+h1{
 	background-image: url('icon_64.png');
 	background-repeat: no-repeat;
 	line-height: 64px;
@@ -15,45 +13,61 @@ div.options-title h1{
 	font-size: 175%;
 }
 
-div.options-table {
+.options-table {
 	background-color: #f4f6fc;
-	border-top: 1px solid #b5c7de;		
 	border-bottom: 1px solid #EDEFF5;
 }
 
-div.options-table-header {
+.options-table h2 {
+	border-top: 1px solid #b5c7de;
+	margin: 0;
+	font-size: inherit;
 	background-color: #ebeff9;	
 	line-height: 20px;
 	vertical-align: middle;		
-	text-indent: 6px;
-	border-bottom: 10px solid #f4f6fc;
+	padding-left:6px;
 	font-weight: bold;
 }
 
-div.options-table-row {
-	font-size: 85%;
-	background-color: #f4f6fc;	
-	line-height: 35px;
-	vertical-align: middle;		
-	text-indent: 12px;
-	display: table-row;
+.option-group table {
+	margin:6px;
+	border-collapse: collapse
 }
 
-div.options-table-cell {
-	display: table-cell;
+td.option-name {
+	width: 13em;
+	vertical-align: top;
+	line-height: 14pt
 }
 
-div.options-buttons {	
-	width: 100%;
-	padding-top: 10px;	
+.option-help {
+	font-style: italic;
+	font-size: 8pt;
+	color: gray;
 }
 
-span#optionsSavedMessage {
-	visibility: hidden;
-	background-color: #fdffbd;	
-	border: 1px dotted #b5c7de;		
-	margin-right: 40px;	
-	padding-right: 40px;	
-	padding-left: 40px;	
-	width: 200px;
+#optionsSavedMessage {
+	position:fixed;
+	background-color: #e3ffbd;	
+	border: 1px solid #10c71e;
+	width:24em;
+	margin-left:-12em;
+	padding:.5em;
+	left:50%;
+	top:50px;
+	text-align:center;
+}
+
+.options-buttons {
+	width:100%;
+	border-collapse: collapse
+}
+
+.credit {
+	color: gray;
+}
+
+.credit a {
+	color: gray;
+	font-weight: bold
 }

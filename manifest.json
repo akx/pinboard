@@ -1,6 +1,6 @@
 {
    "name": "Pinboard",
-   "version": "1.0.7",
+   "version": "1.0.8",
    "description": "A toolbar button for the excellent Pinboard (http://pinboard.in) bookmarking service.",   
    "icons": {
       "128": "icon_128.png"

@@ -1,51 +1,115 @@
+<!DOCTYPE HTML>
+<html lang="en-US">
+<head>
+<meta charset="UTF-8">
+<style type="text/css">
+.menu-item {
+	display: block;
+	font: normal 10pt helvetica, arial, verdana;	
+	padding: 4px; 
+	text-indent: 22px;	
+	cursor: pointer;
+	color: #555;
+	width: 143px;
+	background: #fff url('gray_star.png') no-repeat 5px 5px;
+	border-bottom: 1px solid #eee;
+}
 
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1"/>
-		<title>Pinboard Toolbar Button</title>
-		<link rel="stylesheet" href="popup.css"></link>
-		<script type="text/javascript" src="settings.js"></script>
-		<script type="text/javascript" src="engine.js"></script>
-		<script type="text/javascript">
-			function addMenuItem(show, name, onClickFunction) {
-				if ('yes' == show) {
-					var parentElement = document.getElementById('body-content');
-					var menuItemElement = document.createElement('div');
-					menuItemElement.setAttribute('class', 'menu-item');
-					menuItemElement.setAttribute('onclick', onClickFunction);
-					menuItemElement.appendChild(document.createTextNode(name));
-					parentElement.appendChild(menuItemElement);
-				}
-			}
+.menu-item:first-child {
+	-webkit-border-top-left-radius: 3px;
+	-webkit-border-top-right-radius: 3px;	
+}
 
-			function isUserNameSet() {
-				var userName = getOptionUserName();
-				return userName && '' != userName;
-			}
+.menu-item:last-child {
+	-webkit-border-bottom-left-radius: 3px;
+	-webkit-border-bottom-right-radius: 3px;
+	border-bottom-style: none;	
+}
 
-			function addMenuItems() {
-				if (isUserNameSet()) {
-					addMenuItem(getOptionShowAllBookmarks(), 'All Bookmarks', 'openAllBookmarks()');
-					addMenuItem(getOptionShowPrivateBookmarks(), 'Private Bookmarks', 'openPrivateBookmarks()');
-					addMenuItem(getOptionShowPublicBookmarks(), 'Public Bookmarks', 'openPublicBookmarks()');
-					addMenuItem(getOptionShowUnreadBookmarks(), 'Unread Bookmarks', 'openUnreadBookmarks()');
-					addMenuItem(getOptionShowUntaggedBookmarks(), 'Untagged Bookmarks', 'openUntaggedBookmarks()');
-					addMenuItem(getOptionShowStarredBookmarks(), 'Starred Bookmarks', 'openStarredBookmarks()');
-					addMenuItem(getOptionShowSaveBookmark(), 'Save Bookmark', 'saveBookmark()');
-					addMenuItem(getOptionShowReadLater(), 'Read Later', 'readLater()');
-				}
-				else {
-					addMenuItem('yes', 'Setup User Name', 'openOptions()');
-				}
+.menu-item:hover {
+	color: #11A;	
+	background-color: #f2f2f2;
+	background-image: url('blue_star.png');	
+}
+
+#frame {
+	width:680px;
+	height:350px;
+}
+</style>
+<script type="text/javascript" src="settings.js"></script>
+<script type="text/javascript">
+
+function openUrl(url) {
+	chrome.tabs.getAllInWindow(null, function (tabs) {
+		for(var i = 0; i < tabs.length; i++) {
+			var tab = tabs[i];
+			if (tab.url == url) {
+				chrome.tabs.update(tab.id, {selected:true});								
+				close();
+				return;
 			}
-		</script>
-  	</head>
-  	<body onload="addMenuItems()">
-  		<div id='body-content'>
-  			<div class='menu'>
-  			</div>
-  		</div>
-	</body>
+		}
+		chrome.tabs.create({url: url});		
+		close();
+	});
+}
+
+var proto = (getOptionValue("useHTTPS") ? "https://" : "http://");
+var userName = getOptionValue("userName");
+var menu, frame;
+
+function openPinboardUrl(url) {
+	if(!userName) {
+		return alert("An user name must be set to view your bookmarks.");
+	}
+	openUrl(proto + 'pinboard.in/u:' + userName +  '/' + url);
+}
+
+function openPinboardPopup(url, title, addParams) {
+	var pbUrl = proto + 'pinboard.in/add?url=' + encodeURIComponent(url) + '&title=' + encodeURIComponent(title) + (addParams ? '&' + addParams : '');
+	if(getOptionValue("openPopup")) {
+		window.open(pbUrl, 'pinboard.in popup', 'location=no,links=no,scrollbars=no,toolbar=no,width=700,height=350');
+		window.close();
+	} else {
+		frame.src = pbUrl;
+		frame.style.display = "";
+		menu.style.display = "none";
+	}
+}
+
+var pinboardActions = {
+	saveBookmark: function() {
+		chrome.tabs.getSelected( null , function(tab) { openPinboardPopup(tab.url, tab.title); })
+	},
+	readLater: function() {
+		chrome.tabs.getSelected( null , function(tab) { openPinboardPopup(tab.url, tab.title, 'later=yes&noui=yes&jump=close'); })
+	}
+}
+
+function init() {
+	menu = document.getElementById("menu");
+	frame = document.getElementById("frame");
+	optionGroups["Menu Items"].options.forEach(function(option) {
+		if(getOptionValue(option.name)) {
+			if((option.pinboardUrl && userName) || option.pinboardAction) {
+				var link = document.createElement("a");
+				link.innerHTML = option.text;
+				link.setAttribute("class", "menu-item");
+				link.addEventListener("click", function(){
+					if(option.pinboardUrl) openPinboardUrl(option.pinboardUrl);
+					if(option.pinboardAction) pinboardActions[option.pinboardAction]();
+				}, false);
+				menu.appendChild(link);
+			}
+		}
+	})
+}
+</script>
+</head>
+<body onload="init()">
+	<div id="menu"></div>
+	<iframe id="frame" src="" frameborder="0" style="display:none"></iframe>
+</body>
 </html>
-
 
